@@ -1,0 +1,62 @@
+{
+  "name": "solana-agent-kit-plugin-shinjuku",
+  "version": "0.1.0",
+  "description": "Solana Agent Kit v2 plugin for the Shinjuku private x402 wallet: pay x402 APIs on Solana with amount and payer hidden.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "check": "node scripts/check.mjs",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "solana",
+    "solana-agent-kit",
+    "sendaifun",
+    "plugin",
+    "x402",
+    "privacy",
+    "shielded",
+    "usdc",
+    "mcp"
+  ],
+  "author": "Shinjuku StAItion",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "zod": "^3.25.0"
+  },
+  "peerDependencies": {
+    "solana-agent-kit": "^2.0.0"
+  },
+  "devDependencies": {
+    "@solana/web3.js": "^1.99.0",
+    "@types/node": "^22.20.5",
+    "typescript": "^5.9.3",
+    "solana-agent-kit": "^2.0.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShinjukuStaition/shinjuku-sak-plugin.git"
+  },
+  "homepage": "https://github.com/ShinjukuStaition/shinjuku-sak-plugin#readme",
+  "bugs": {
+    "url": "https://github.com/ShinjukuStaition/shinjuku-sak-plugin/issues"
+  }
+}
