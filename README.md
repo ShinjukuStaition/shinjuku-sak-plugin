@@ -53,11 +53,13 @@ The plugin starts ONE wallet process per plugin instance, on the first call. `cl
 
 Every method and every action returns the wallet's parsed JSON answer. Amounts are atomic USDC units: `1000000` = 1 USDC.
 
+A payment to an outside seller goes through Shinjuku: your wallet pays Shinjuku privately, and Shinjuku pays the seller. The answer then holds `shinjukuTransaction` (your private payment) and `transaction` (the seller's settlement, when the seller returns one).
+
 ## Options
 
 | Option | Wallet flag | Meaning |
 | --- | --- | --- |
-| `version` | | `shinjuku-shielded` version to run. Default `0.3.12`. |
+| `version` | | `shinjuku-shielded` version to run. Default `0.3.14`. |
 | `walletHome` | env `SHIELDED_WALLET_HOME` | The wallet folder. |
 | `maxPayment` | `--max-payment` | Most one payment may cost. |
 | `maxSession` | `--max-session` | Most all payments of one wallet process may cost. |

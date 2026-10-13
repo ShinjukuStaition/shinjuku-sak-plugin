@@ -3,7 +3,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 /** Default pinned version of the `shinjuku-shielded` npm package. */
-export const DEFAULT_WALLET_VERSION = "0.3.12";
+export const DEFAULT_WALLET_VERSION = "0.3.14";
 
 /** The error code that x402_pay answers while the wallet refills. */
 export const REFILLING_CODE = "wallet_refilling_retry_same_request";
