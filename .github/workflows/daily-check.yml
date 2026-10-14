@@ -1,0 +1,82 @@
+name: Daily check with the newest wallet
+
+# The plugin runs shinjuku-shielded@latest by default. Every day this job sets up a new,
+# empty throwaway wallet with the newest wallet release and checks that every wallet tool
+# the plugin calls still exists and takes the plugin's arguments. It moves no money.
+# On a mismatch it opens one issue in this repository.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: daily-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Install and build the plugin
+        run: npm ci && npm run build
+
+      - name: Read the newest wallet version
+        id: wallet
+        run: |
+          set -euo pipefail
+          version=$(npm view shinjuku-shielded@latest version)
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::unexpected version '$version'"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "shinjuku-shielded latest = $version"
+
+      - name: Set up a throwaway wallet (free, no funds)
+        env:
+          SHIELDED_WALLET_HOME: ${{ runner.temp }}/wallet
+          VERSION: ${{ steps.wallet.outputs.version }}
+        run: |
+          set -euo pipefail
+          npx -y "shinjuku-shielded@$VERSION" setup --yes > "$RUNNER_TEMP/setup.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/setup.log"; exit 1; }
+          echo "setup ok"
+
+      - name: Interface check
+        env:
+          VERSION: ${{ steps.wallet.outputs.version }}
+        run: node scripts/interface-check.mjs "$RUNNER_TEMP/wallet" "$VERSION" | tee "$RUNNER_TEMP/check.log"
+
+      - name: Open an issue on failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.wallet.outputs.version }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -uo pipefail
+          title="Daily check failed with shinjuku-shielded ${VERSION:-unknown}"
+          if [[ -n "$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[].number')" ]]; then
+            echo "an open issue exists already"; exit 0
+          fi
+          {
+            echo "The daily check failed: $RUN_URL"
+            echo
+            echo '```'
+            tail -n 40 "$RUNNER_TEMP/check.log" 2>/dev/null || echo "(no check output; see the run log)"
+            echo '```'
+          } > "$RUNNER_TEMP/issue.md"
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body-file "$RUNNER_TEMP/issue.md"

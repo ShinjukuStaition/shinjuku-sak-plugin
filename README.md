@@ -55,11 +55,19 @@ Every method and every action returns the wallet's parsed JSON answer. Amounts a
 
 A payment to an outside seller goes through Shinjuku: your wallet pays Shinjuku privately, and Shinjuku pays the seller. The answer then holds `shinjukuTransaction` (your private payment) and `transaction` (the seller's settlement, when the seller returns one).
 
+## Wallet version
+
+By default the plugin runs `npx -y shinjuku-shielded@latest mcp`. A new wallet release reaches your agent at its next start, and you do not need a new plugin version. This is important: when the Shinjuku pool program changes, an old wallet build can stop working.
+
+To pin one wallet version, set `version`, for example `ShinjukuPlugin({ version: "0.3.18" })`.
+
+Every day, the workflow `daily-check.yml` sets up an empty throwaway wallet with the newest wallet release. It checks that each wallet tool that the plugin calls exists and takes the plugin's arguments. It moves no money. On a difference, it opens an issue in this repository, and a new plugin version follows.
+
 ## Options
 
 | Option | Wallet flag | Meaning |
 | --- | --- | --- |
-| `version` | | `shinjuku-shielded` version to run. Default `0.3.14`. |
+| `version` | | `shinjuku-shielded` version or dist-tag to run. Default `latest`. |
 | `walletHome` | env `SHIELDED_WALLET_HOME` | The wallet folder. |
 | `maxPayment` | `--max-payment` | Most one payment may cost. |
 | `maxSession` | `--max-session` | Most all payments of one wallet process may cost. |
@@ -125,6 +133,12 @@ node scripts/check.mjs <wallet-folder>
 ```
 
 The check calls only `shinjukuStatus` and `shinjukuBalance`. Both are free. It masks long base58 strings in the output.
+
+```sh
+node scripts/interface-check.mjs <wallet-folder> [wallet-version]
+```
+
+The interface check also compares the wallet's tool list with the arguments the plugin sends. The daily workflow runs it.
 
 ## Interface source
 

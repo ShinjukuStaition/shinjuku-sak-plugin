@@ -1,6 +1,6 @@
 {
   "name": "solana-agent-kit-plugin-shinjuku",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Solana Agent Kit v2 plugin for the Shinjuku private x402 wallet: pay x402 APIs on Solana with amount and payer hidden.",
   "type": "module",
   "main": "dist/index.js",
@@ -20,6 +20,7 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "check": "node scripts/check.mjs",
+    "interface-check": "node scripts/interface-check.mjs",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

@@ -2,8 +2,11 @@ import { randomBytes } from "node:crypto";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
-/** Default pinned version of the `shinjuku-shielded` npm package. */
-export const DEFAULT_WALLET_VERSION = "0.3.14";
+/**
+ * Default `shinjuku-shielded` version: the npm dist-tag `latest`. A new wallet release reaches
+ * the plugin at the next start, without a new plugin version. Set `version` to pin one.
+ */
+export const DEFAULT_WALLET_VERSION = "latest";
 
 /** The error code that x402_pay answers while the wallet refills. */
 export const REFILLING_CODE = "wallet_refilling_retry_same_request";
@@ -12,7 +15,7 @@ export const REFILLING_CODE = "wallet_refilling_retry_same_request";
 export const REQUEST_ID_PATTERN = /^[A-Za-z0-9_-]{1,44}$/;
 
 export interface ShinjukuPluginOptions {
-  /** Version of `shinjuku-shielded` to run with npx. Default "0.3.11". */
+  /** Version or dist-tag of `shinjuku-shielded` to run with npx. Default "latest". */
   version?: string;
   /** Wallet folder. Sets SHIELDED_WALLET_HOME for the wallet process. */
   walletHome?: string;
@@ -135,7 +138,7 @@ export class ShinjukuClient {
       env: childEnv(this.options.walletHome),
       stderr: "ignore",
     });
-    const client = new Client({ name: "solana-agent-kit-plugin-shinjuku", version: "0.1.0" });
+    const client = new Client({ name: "solana-agent-kit-plugin-shinjuku", version: "0.1.1" });
     const run = client.connect(transport).then(
       () => {
         this.client = client;

@@ -1,0 +1,51 @@
+name: Publish to npm
+
+# npm trusted publishing (OIDC): no npm token is stored in this repository.
+# Run it by hand after the version in package.json is raised and pushed.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: npm with trusted publishing (OIDC needs npm 11.5.1 or later)
+        run: npm install -g npm@11.13.0 && npm --version
+
+      - name: Check the version is new
+        run: |
+          set -euo pipefail
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "::error::$name@$version is already published"; exit 1
+          fi
+          echo "publishing $name@$version"
+
+      - name: Install, build, pack list
+        run: npm ci && npm run build && npm pack --dry-run
+
+      - name: Publish with provenance
+        run: npm publish --provenance --access public
