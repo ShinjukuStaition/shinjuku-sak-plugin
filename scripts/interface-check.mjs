@@ -53,7 +53,7 @@ try {
       if (!sent.includes(arg)) problems.push(`${name}: the tool requires "${arg}", the plugin does not send it`);
     }
   }
-  console.log(`wallet server ${served}: ${tools.length} tools: ${tools.map((tool) => tool.name).join(", ")}`);
+  console.log(`shinjuku-shielded@${version} (server ${served}): ${tools.length} tools: ${tools.map((tool) => tool.name).join(", ")}`);
 } finally {
   await client.close();
 }
@@ -73,8 +73,8 @@ try {
 }
 
 if (problems.length > 0) {
-  console.log(`INTERFACE MISMATCH with shinjuku-shielded ${served}:`);
+  console.log(`INTERFACE MISMATCH with shinjuku-shielded@${version}:`);
   for (const problem of problems) console.log(`- ${problem}`);
   process.exit(1);
 }
-console.log(`INTERFACE OK with shinjuku-shielded ${served}`);
+console.log(`INTERFACE OK with shinjuku-shielded@${version}`);
