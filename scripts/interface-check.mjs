@@ -65,8 +65,9 @@ try {
   if (status.setUp !== true) problems.push("shinjukuStatus does not answer setUp: true");
   const balance = await plugin.methods.shinjukuBalance();
   console.log("shinjukuBalance:", mask(balance));
-  if (balance.ok !== true || typeof balance.balanceAtomic !== "string") {
-    problems.push("shinjukuBalance does not answer ok: true with a balanceAtomic string");
+  // balanceAtomic is null while the wallet has no balance walk yet (for example during a pool switch).
+  if (balance.ok !== true || !(typeof balance.balanceAtomic === "string" || (balance.balanceAtomic === null && typeof balance.status === "string"))) {
+    problems.push("shinjukuBalance does not answer ok: true with a balanceAtomic string (or null with a status)");
   }
 } finally {
   await plugin.close();
