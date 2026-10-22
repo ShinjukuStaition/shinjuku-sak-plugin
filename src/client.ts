@@ -62,7 +62,9 @@ export function buildCommand(
 ): { command: string; args: string[] } {
   const version = options.version ?? DEFAULT_WALLET_VERSION;
   if (!/^[0-9A-Za-z.+-]{1,64}$/.test(version)) throw new Error("version is not a valid npm version");
-  const args = ["-y", `shinjuku-shielded@${version}`, "mcp"];
+  // --no-audit --no-fund: at the first start after a new wallet version, npx ran npm's audit request, and it hung
+  // for about 5 min (2026-10-22: setup 311.9 s). The flags skip it.
+  const args = ["-y", "--no-audit", "--no-fund", `shinjuku-shielded@${version}`, "mcp"];
   if (options.maxPayment !== undefined) args.push("--max-payment", atomic("maxPayment", options.maxPayment));
   if (options.maxSession !== undefined) args.push("--max-session", atomic("maxSession", options.maxSession));
   if (options.maxUnshield !== undefined) args.push("--max-unshield", atomic("maxUnshield", options.maxUnshield));
@@ -179,7 +181,7 @@ export class ShinjukuClient {
         ok: false,
         error: "shinjuku_tool_unavailable",
         detail: `the wallet server does not offer ${name} now; nothing was paid or moved`,
-        next: "if the wallet is not set up, run `npx -y shinjuku-shielded setup` in a terminal, then call again",
+        next: "if the wallet is not set up, run `npx -y --no-audit --no-fund shinjuku-shielded setup` in a terminal, then call again",
       };
     }
     const clean: Record<string, unknown> = {};

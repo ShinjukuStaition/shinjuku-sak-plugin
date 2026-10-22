@@ -19,7 +19,7 @@ Node 22 or later (the wallet needs it). `npx` must be on the PATH. The wallet ru
 Set up the wallet once, in a real terminal:
 
 ```sh
-npx -y shinjuku-shielded setup
+npx -y --no-audit --no-fund shinjuku-shielded setup
 ```
 
 The setup asks questions, so an agent cannot do it. Until setup is done, `SHINJUKU_STATUS` answers `setUp: false`. The other tools answer `wallet_not_set_up`.
@@ -57,7 +57,7 @@ A payment to an outside seller goes through Shinjuku: your wallet pays Shinjuku 
 
 ## Wallet version
 
-By default the plugin runs `npx -y shinjuku-shielded@latest mcp`. A new wallet release reaches your agent at its next start, and you do not need a new plugin version. This is important: when the Shinjuku pool program changes, an old wallet build can stop working.
+By default the plugin runs `npx -y --no-audit --no-fund shinjuku-shielded@latest mcp`. A new wallet release reaches your agent at its next start, and you do not need a new plugin version. This is important: when the Shinjuku pool program changes, an old wallet build can stop working.
 
 To pin one wallet version, set `version`, for example `ShinjukuPlugin({ version: "0.3.18" })`.
 
