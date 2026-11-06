@@ -12,7 +12,7 @@ The plugin does not hold keys and does not make payments by itself. It starts th
 npm install solana-agent-kit solana-agent-kit-plugin-shinjuku
 ```
 
-Node 22 or later (the wallet needs it). `npx` must be on the PATH. The wallet runs on Linux, and on Windows through WSL; macOS is not supported.
+Node 22.21 or later, or Node 24 or later (the wallet needs it). `npx` must be on the PATH. The wallet runs on Linux, and on Windows through WSL; macOS is not supported.
 
 ## One-time setup (in a terminal)
 
