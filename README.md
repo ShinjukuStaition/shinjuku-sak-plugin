@@ -61,7 +61,7 @@ By default the plugin runs `npx -y --no-audit --no-fund shinjuku-shield@0.3.131 
 
 To run another wallet version, set `version`, for example `ShinjukuPlugin({ version: "0.3.131" })`. Newer wallets name two tools differently (`pay_for_service` for `x402_pay`, `check_price` for `x402_preview`); the plugin calls the name the wallet lists, so both work.
 
-The workflow `daily-check.yml` sets up an empty throwaway wallet and checks that each wallet tool that the plugin calls exists and takes the plugin's arguments. It moves no money. On a difference, it opens an issue in this repository.
+The workflow `daily-check.yml` (off now; a maintainer starts it by hand) sets up an empty throwaway wallet and checks that each wallet tool that the plugin calls exists and takes the plugin's arguments. It moves no money. On a difference, it opens an issue in this repository.
 
 ## Options
 
@@ -138,7 +138,7 @@ The check calls only `shinjukuStatus` and `shinjukuBalance`. Both are free. It m
 node scripts/interface-check.mjs <wallet-folder> [wallet-version]
 ```
 
-The interface check also compares the wallet's tool list with the arguments the plugin sends. The daily workflow runs it.
+The interface check also compares the wallet's tool list with the arguments the plugin sends. The `daily-check.yml` workflow runs it.
 
 ## Interface source
 
