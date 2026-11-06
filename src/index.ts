@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { Action, Plugin, SolanaAgentKit } from "solana-agent-kit";
 import {
   ShinjukuClient,
+  TOOL_NAMES,
   newRequestId,
   withRequestId,
   type ShinjukuPluginOptions,
@@ -15,6 +16,8 @@ export {
   parseToolResult,
   DEFAULT_WALLET_VERSION,
   REFILLING_CODE,
+  TOOL_NAMES,
+  WALLET_PACKAGE,
   REQUEST_ID_PATTERN,
 } from "./client.js";
 export type { ShinjukuPluginOptions, ShinjukuResult } from "./client.js";
@@ -94,7 +97,7 @@ export function ShinjukuPlugin(options: ShinjukuPluginOptions = {}) {
     return withRequestId(await wallet.call("wallet_unshield", { ...parsed, request_id: requestId }), requestId);
   };
   const pay = async (input: Record<string, unknown>) => wallet.pay(paySchema.parse(input));
-  const preview = async (input: Record<string, unknown>) => wallet.call("x402_preview", previewSchema.parse(input));
+  const preview = async (input: Record<string, unknown>) => wallet.call(TOOL_NAMES.preview, previewSchema.parse(input));
   const receipts = async (input: Record<string, unknown>) => wallet.call("wallet_receipts", receiptsSchema.parse(input));
   const balance = async () => wallet.call("wallet_balance");
   const status = async (): Promise<ShinjukuResult> => {

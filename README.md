@@ -2,9 +2,9 @@
 
 A [Solana Agent Kit](https://github.com/sendaifun/solana-agent-kit) v2 plugin for the Shinjuku private x402 wallet.
 
-Your agent pays x402 APIs on Solana from a shielded USDC balance. The chain does not show the amount or the payer.
+Your agent pays x402 APIs on Solana from a private USDC balance that only your keys can move. The chain does not show which wallet paid: your wallet pays Shinjuku privately, and Shinjuku pays the seller from its own funds. The seller's payment is a normal USDC payment, so its amount and the seller show on chain. Adding USDC to the private balance and sending it out to an address show their amounts too.
 
-The plugin does not hold keys and does not make payments by itself. It starts the official wallet, the npm package [`shinjuku-shielded`](https://www.npmjs.com/package/shinjuku-shielded), as a local MCP stdio server. It then calls the wallet's tools. Full wallet docs: [shinjuku-mcp](https://github.com/ShinjukuStaition/shinjuku-mcp).
+The plugin does not hold keys and does not make payments by itself. It starts the official wallet, the npm package [`shinjuku-shield`](https://www.npmjs.com/package/shinjuku-shield), as a local MCP stdio server. It then calls the wallet's tools. Full wallet docs: [shinjuku-shield](https://github.com/ShinjukuStaition/shinjuku-shield).
 
 ## Install
 
@@ -19,7 +19,7 @@ Node 22 or later (the wallet needs it). `npx` must be on the PATH. The wallet ru
 Set up the wallet once, in a real terminal:
 
 ```sh
-npx -y --no-audit --no-fund shinjuku-shielded setup
+npx -y --no-audit --no-fund shinjuku-shield@0.3.131 setup
 ```
 
 The setup asks questions, so an agent cannot do it. Until setup is done, `SHINJUKU_STATUS` answers `setUp: false`. The other tools answer `wallet_not_set_up`.
@@ -57,17 +57,17 @@ A payment to an outside seller goes through Shinjuku: your wallet pays Shinjuku 
 
 ## Wallet version
 
-By default the plugin runs `npx -y --no-audit --no-fund shinjuku-shielded@latest mcp`. A new wallet release reaches your agent at its next start, and you do not need a new plugin version. This is important: when the Shinjuku pool program changes, an old wallet build can stop working.
+By default the plugin runs `npx -y --no-audit --no-fund shinjuku-shield@0.3.131 mcp`: the exact stable wallet release this plugin version was checked with. A new stable wallet release comes with a new plugin version. Set up the wallet with the same version (the setup line above).
 
-To pin one wallet version, set `version`, for example `ShinjukuPlugin({ version: "0.3.18" })`.
+To run another wallet version, set `version`, for example `ShinjukuPlugin({ version: "0.3.131" })`. Newer wallets name two tools differently (`pay_for_service` for `x402_pay`, `check_price` for `x402_preview`); the plugin calls the name the wallet lists, so both work.
 
-Every day, the workflow `daily-check.yml` sets up an empty throwaway wallet with the newest wallet release. It checks that each wallet tool that the plugin calls exists and takes the plugin's arguments. It moves no money. On a difference, it opens an issue in this repository, and a new plugin version follows.
+The workflow `daily-check.yml` sets up an empty throwaway wallet and checks that each wallet tool that the plugin calls exists and takes the plugin's arguments. It moves no money. On a difference, it opens an issue in this repository.
 
 ## Options
 
 | Option | Wallet flag | Meaning |
 | --- | --- | --- |
-| `version` | | `shinjuku-shielded` version or dist-tag to run. Default `latest`. |
+| `version` | | `shinjuku-shield` version or dist-tag to run. Default `0.3.131` (the stable release). |
 | `walletHome` | env `SHIELDED_WALLET_HOME` | The wallet folder. |
 | `maxPayment` | `--max-payment` | Most one payment may cost. |
 | `maxSession` | `--max-session` | Most all payments of one wallet process may cost. |
@@ -85,8 +85,8 @@ Every day, the workflow `daily-check.yml` sets up an empty throwaway wallet with
 | `SHINJUKU_STATUS` | `shinjukuStatus` | `wallet_status` before setup; after setup the list of wallet tools | none | no |
 | `SHINJUKU_BALANCE` | `shinjukuBalance` | `wallet_balance` | none | no |
 | `SHINJUKU_RECEIPTS` | `shinjukuReceipts` | `wallet_receipts` | `limit` (1-200) | no |
-| `SHINJUKU_X402_PREVIEW` | `shinjukuPreview` | `x402_preview` | `url`, `method`, `headers`, `body` | no |
-| `SHINJUKU_X402_PAY` | `shinjukuPay` | `x402_pay` | `url`, `method`, `headers`, `body`, `request_id`, `max_payment_atomic` | yes |
+| `SHINJUKU_X402_PREVIEW` | `shinjukuPreview` | `check_price` (`x402_preview` on 0.3.131) | `url`, `method`, `headers`, `body` | no |
+| `SHINJUKU_X402_PAY` | `shinjukuPay` | `pay_for_service` (`x402_pay` on 0.3.131) | `url`, `method`, `headers`, `body`, `request_id`, `max_payment_atomic` | yes |
 | `SHINJUKU_SHIELD` | `shinjukuShield` | `wallet_shield` | `amount_atomic`, `request_id` | moves USDC |
 | `SHINJUKU_UNSHIELD` | `shinjukuUnshield` | `wallet_unshield` | `amount_atomic`, `to`, `request_id` | moves USDC |
 
@@ -96,13 +96,13 @@ When you give no `request_id`, the plugin makes one (it matches `^[A-Za-z0-9_-]{
 
 ## Caps
 
-The wallet enforces the caps, not the plugin. `maxPayment` and `maxSession` are the launch caps. `max_payment_atomic` on one payment can only lower the cap. It can never raise it. It must cover the price plus the fee. `x402_preview` shows `priceAtomic`, `feeAtomic` and `totalAtomic`.
+The wallet enforces the caps, not the plugin. `maxPayment` and `maxSession` are the launch caps. `max_payment_atomic` on one payment can only lower the cap. It can never raise it. It must cover the price plus the fee. The price check (`shinjukuPreview`) shows `priceAtomic`, `feeAtomic` and `totalAtomic`.
 
 Unshield to an address that is not in `unshieldTo` needs a confirmation in an MCP client. This plugin cannot show that prompt, so the wallet refuses such an address. Put the addresses that you trust in `unshieldTo`.
 
 ## Retry behaviour
 
-`x402_pay` can answer `wallet_refilling_retry_same_request` with `readyInSeconds`. This is not a payment. The wallet moves value inside your private balance first.
+A payment can answer `wallet_refilling_retry_same_request` with `readyInSeconds` (wallet 0.3.131). This is not a payment. The wallet moves value inside your private balance first.
 
 `shinjukuPay` then waits `readyInSeconds` and calls again with the SAME `request_id`. It stops after `payRetryMaxWaitMs` (default 15 minutes) and returns the last answer.
 
@@ -112,7 +112,7 @@ A repeat with the same `request_id` never pays twice. After a payment it returns
 
 Solana Agent Kit turns its actions into tools for other frameworks: `createVercelAITools`, `createLangchainTools` and `createOpenAITools` (exported by `solana-agent-kit`). The Shinjuku actions come along with the other actions.
 
-To use the wallet in the Vercel AI SDK without Solana Agent Kit, connect the MCP server directly: see [examples/vercel-ai-sdk.md](https://github.com/ShinjukuStaition/shinjuku-mcp/blob/main/examples/vercel-ai-sdk.md).
+To use the wallet in the Vercel AI SDK without Solana Agent Kit, connect the MCP server directly: see [examples/vercel-ai-sdk.md](https://github.com/ShinjukuStaition/shinjuku-shield/blob/main/examples/vercel-ai-sdk.md).
 
 ## Live proof
 
