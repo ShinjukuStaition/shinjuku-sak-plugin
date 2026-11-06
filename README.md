@@ -102,7 +102,7 @@ Unshield to an address that is not in `unshieldTo` needs a confirmation in an MC
 
 ## Retry behaviour
 
-A payment can answer `wallet_refilling_retry_same_request` with `readyInSeconds` (wallet 0.3.131). This is not a payment. The wallet moves value inside your private balance first.
+An older wallet (not 0.3.131) can answer a payment with `wallet_refilling_retry_same_request` and `readyInSeconds`. This is not a payment. The wallet moves value inside your private balance first.
 
 `shinjukuPay` then waits `readyInSeconds` and calls again with the SAME `request_id`. It stops after `payRetryMaxWaitMs` (default 15 minutes) and returns the last answer.
 
