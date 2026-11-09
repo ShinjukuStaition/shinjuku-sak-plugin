@@ -39,10 +39,10 @@ jobs:
         id: wallet
         run: |
           set -euo pipefail
-          version=$(npm view shinjuku-shielded@latest version)
+          version=$(npm view shinjuku-shield@latest version)
           [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::unexpected version '$version'"; exit 1; }
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "shinjuku-shielded latest = $version"
+          echo "shinjuku-shield latest = $version"
 
       - name: Set up a throwaway wallet (free, no funds)
         env:
@@ -50,7 +50,7 @@ jobs:
           VERSION: ${{ steps.wallet.outputs.version }}
         run: |
           set -euo pipefail
-          npx -y "shinjuku-shielded@$VERSION" setup --yes > "$RUNNER_TEMP/setup.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/setup.log"; exit 1; }
+          npx -y --no-audit --no-fund "shinjuku-shield@$VERSION" setup --yes > "$RUNNER_TEMP/setup.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/setup.log"; exit 1; }
           echo "setup ok"
 
       - name: Interface check
@@ -66,7 +66,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -uo pipefail
-          title="Interface check failed with shinjuku-shielded ${VERSION:-unknown}"
+          title="Interface check failed with shinjuku-shield ${VERSION:-unknown}"
           if [[ -n "$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[].number')" ]]; then
             echo "an open issue exists already"; exit 0
           fi

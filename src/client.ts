@@ -60,6 +60,15 @@ export function newRequestId(prefix = "sak"): string {
   return `${prefix}-${randomBytes(12).toString("hex")}`;
 }
 
+/** A Solana address in base58 (32 to 44 characters): the only form --unshield-to takes. */
+const BASE58_ADDRESS = /^[1-9A-HJ-NP-Za-km-z]{32,44}$/;
+
+/**
+ * One extraArgs word: a flag (--name) or a value of letters, digits and . _ : / \ @ + = , -. On Windows the wallet starts
+ * through `cmd /c npx`, and cmd reads & | < > ^ % ! " ( ) and spaces as shell syntax; no word with one of them is passed.
+ */
+const EXTRA_ARG = /^(?:--[a-z][a-z0-9-]{0,63}|[A-Za-z0-9._:/\\@+=,-]{1,512})$/;
+
 function atomic(name: string, value: string | number | bigint): string {
   const text = String(value);
   if (!/^[1-9][0-9]*$/.test(text)) {
@@ -81,9 +90,17 @@ export function buildCommand(
   if (options.maxPayment !== undefined) args.push("--max-payment", atomic("maxPayment", options.maxPayment));
   if (options.maxSession !== undefined) args.push("--max-session", atomic("maxSession", options.maxSession));
   if (options.maxUnshield !== undefined) args.push("--max-unshield", atomic("maxUnshield", options.maxUnshield));
-  for (const address of options.unshieldTo ?? []) args.push("--unshield-to", address);
+  for (const address of options.unshieldTo ?? []) {
+    if (typeof address !== "string" || !BASE58_ADDRESS.test(address)) throw new Error("unshieldTo takes only base58 Solana addresses");
+    args.push("--unshield-to", address);
+  }
   if (options.tor) args.push("--tor");
-  args.push(...(options.extraArgs ?? []));
+  for (const word of options.extraArgs ?? []) {
+    if (typeof word !== "string" || !EXTRA_ARG.test(word)) {
+      throw new Error("extraArgs takes only flags (--name) and values of letters, digits and . _ : / \\ @ + = , - (no spaces or shell characters)");
+    }
+    args.push(word);
+  }
   if (platform === "win32") return { command: "cmd", args: ["/c", "npx", ...args] };
   return { command: "npx", args };
 }
@@ -197,11 +214,19 @@ export class ShinjukuClient {
     const tool = names.find((one) => listed.includes(one));
     if (tool === undefined) {
       const version = this.options.version ?? DEFAULT_WALLET_VERSION;
+      // A wallet that is not set up lists its setup tools (shinjuku_setup, wallet_status) instead of the wallet tools.
+      const notSetUp = listed.includes("shinjuku_setup");
       return {
         ok: false,
         error: "shinjuku_tool_unavailable",
-        detail: `the wallet server does not offer ${names.join(" or ")} now; nothing was paid or moved`,
-        next: `if the wallet is not set up, run \`npx -y --no-audit --no-fund ${WALLET_PACKAGE}@${version} setup\` in a terminal, then call again`,
+        detail: notSetUp
+          ? `the wallet is not set up yet, so it does not offer ${names.join(" or ")}; nothing was paid or moved`
+          : `this wallet version (${WALLET_PACKAGE}@${version}) does not offer ${names.join(" or ")}; nothing was paid or moved`,
+        next: notSetUp
+          ? `run \`npx -y --no-audit --no-fund ${WALLET_PACKAGE}@${version} setup\` in a terminal, then call again`
+          : version === DEFAULT_WALLET_VERSION
+            ? `install the newest version of this plugin (npm install solana-agent-kit-plugin-shinjuku@latest), then call again`
+            : `leave \`version\` unset so the plugin runs the wallet version it was checked with (${WALLET_PACKAGE}@${DEFAULT_WALLET_VERSION}), then call again`,
       };
     }
     const clean: Record<string, unknown> = {};

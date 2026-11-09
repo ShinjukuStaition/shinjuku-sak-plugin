@@ -22,7 +22,7 @@ Set up the wallet once, in a real terminal:
 npx -y --no-audit --no-fund shinjuku-shield@0.3.131 setup
 ```
 
-The setup asks questions, so an agent cannot do it. Until setup is done, `SHINJUKU_STATUS` answers `setUp: false`. The other tools answer `wallet_not_set_up`.
+The setup asks questions, so an agent cannot do it. Until setup is done, `SHINJUKU_STATUS` answers `setUp: false`. The other actions answer `shinjuku_tool_unavailable` with that setup line, and call nothing.
 
 To use a different wallet folder, set `SHIELDED_WALLET_HOME` for the setup. Give the same folder to the plugin as `walletHome`.
 
@@ -72,9 +72,9 @@ The workflow `daily-check.yml` has no schedule: a maintainer starts it by hand. 
 | `maxPayment` | `--max-payment` | Most one payment may cost. |
 | `maxSession` | `--max-session` | Most all payments of one wallet process may cost. |
 | `maxUnshield` | `--max-unshield` | Most one unshield may send. |
-| `unshieldTo` | `--unshield-to` (repeated) | Addresses that unshield may send to at once. |
+| `unshieldTo` | `--unshield-to` (repeated) | Addresses that unshield may send to at once (base58 Solana addresses only). |
 | `tor` | `--tor` | Send the wallet's traffic through Tor. |
-| `extraArgs` | | More wallet arguments, added last. |
+| `extraArgs` | | More wallet arguments, added last: flags (`--name`) and values of letters, digits and `. _ : / \ @ + = , -` only (no spaces or shell characters; on Windows the wallet starts through `cmd`). |
 | `payRetryMaxWaitMs` | | Most total wait for refill retries. Default 15 minutes. |
 | `callTimeoutMs` | | Timeout for one tool call. Default 5 minutes. |
 
