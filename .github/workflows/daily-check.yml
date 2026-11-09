@@ -1,13 +1,11 @@
-name: Daily check with the newest wallet
+name: Interface check with the newest wallet
 
-# The plugin runs shinjuku-shielded@latest by default. Every day this job sets up a new,
+# A maintainer starts this job by hand (no schedule). It sets up a new,
 # empty throwaway wallet with the newest wallet release and checks that every wallet tool
 # the plugin calls still exists and takes the plugin's arguments. It moves no money.
 # On a mismatch it opens one issue in this repository.
 
 on:
-  schedule:
-    - cron: "17 6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -68,12 +66,12 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -uo pipefail
-          title="Daily check failed with shinjuku-shielded ${VERSION:-unknown}"
+          title="Interface check failed with shinjuku-shielded ${VERSION:-unknown}"
           if [[ -n "$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[].number')" ]]; then
             echo "an open issue exists already"; exit 0
           fi
           {
-            echo "The daily check failed: $RUN_URL"
+            echo "The interface check failed: $RUN_URL"
             echo
             echo '```'
             tail -n 40 "$RUNNER_TEMP/check.log" 2>/dev/null || echo "(no check output; see the run log)"

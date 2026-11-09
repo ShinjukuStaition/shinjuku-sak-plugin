@@ -12,7 +12,7 @@ The plugin does not hold keys and does not make payments by itself. It starts th
 npm install solana-agent-kit solana-agent-kit-plugin-shinjuku
 ```
 
-Node 22.21 or later, or Node 24 or later (the wallet needs it). `npx` must be on the PATH. The wallet runs on Linux, and on Windows through WSL; macOS is not supported.
+Node 22.21 or later, or Node 24 or later (the wallet needs it). `npx` must be on the PATH. The wallet version this plugin runs (`shinjuku-shield` 0.3.131) runs on Linux, and on Windows through WSL; it does not run on macOS (its setup stops there and creates nothing).
 
 ## One-time setup (in a terminal)
 
@@ -61,7 +61,7 @@ By default the plugin runs `npx -y --no-audit --no-fund shinjuku-shield@0.3.131 
 
 To run another wallet version, set `version`, for example `ShinjukuPlugin({ version: "0.3.131" })`. Newer wallets name two tools differently (`pay_for_service` for `x402_pay`, `check_price` for `x402_preview`); the plugin calls the name the wallet lists, so both work.
 
-The workflow `daily-check.yml` (off now; a maintainer starts it by hand) sets up an empty throwaway wallet and checks that each wallet tool that the plugin calls exists and takes the plugin's arguments. It moves no money. On a difference, it opens an issue in this repository.
+The workflow `daily-check.yml` has no schedule: a maintainer starts it by hand. It sets up an empty throwaway wallet and checks that each wallet tool that the plugin calls exists and takes the plugin's arguments. It moves no money. On a difference, it opens an issue in this repository.
 
 ## Options
 
@@ -116,7 +116,7 @@ To use the wallet in the Vercel AI SDK without Solana Agent Kit, connect the MCP
 
 ## Live proof
 
-On 2026-10-13 a real `SolanaAgentKit` agent with this plugin (wallet `shinjuku-shielded@0.3.12`) paid a public satellite-imagery seller 0.013 USDC (+0.001 fee) on Solana mainnet through `SHINJUKU_X402_PAY`, and got the JPEG back in 36 s:
+On 2026-10-13 a real `SolanaAgentKit` agent with this plugin (wallet `shinjuku-shielded@0.3.12`) paid a public satellite-imagery seller 0.013 USDC (+0.001 fee) on Solana mainnet through `SHINJUKU_X402_PAY`, and got the JPEG back in 36 s. That run used an older wallet (0.3.12); no live run with 0.3.131 is on record yet:
 
 - Private payment from the wallet to Shinjuku (pool transaction): [`66BgMYrD…Nxex6E`](https://solscan.io/tx/66BgMYrD6XecUcy3EVo1UmkrAWxDdidC4qLUDeLuzsjsm3KFNhYoNhdLW3QTQkgPJmWsTmjjP7VcQ8StFtNxex6E)
 - Shinjuku pays the seller (the chain shows Shinjuku, not the wallet): [`4ecLga5y…9qudu`](https://solscan.io/tx/4ecLga5ypMivF8sqiUUb4Tfm7yQxWpp8dLcWSPe3tSfMmvsbFGsRHosr1QS58z68UsWCTdztDVvPBv5ZT4z9qudu)
@@ -138,7 +138,7 @@ The check calls only `shinjukuStatus` and `shinjukuBalance`. Both are free. It m
 node scripts/interface-check.mjs <wallet-folder> [wallet-version]
 ```
 
-The interface check also compares the wallet's tool list with the arguments the plugin sends. The `daily-check.yml` workflow runs it.
+The interface check also compares the wallet's tool list with the arguments the plugin sends. The `daily-check.yml` workflow (started by hand) runs it.
 
 ## Interface source
 
