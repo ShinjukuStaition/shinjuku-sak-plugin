@@ -12,14 +12,14 @@ The plugin does not hold keys and does not make payments by itself. It starts th
 npm install solana-agent-kit solana-agent-kit-plugin-shinjuku
 ```
 
-Node 22.21 or later, or Node 24 or later (the wallet needs it). `npx` must be on the PATH. The wallet version this plugin runs (`shinjuku-shield` 0.3.131) runs on Linux, and on Windows through WSL; it does not run on macOS (its setup stops there and creates nothing).
+Node 22.21 or later, or Node 24 or later (the wallet needs it). `npx` must be on the PATH. The wallet version this plugin runs is `shinjuku-shield` 0.3.218; its [README](https://github.com/ShinjukuStaition/shinjuku-shield) names the systems it runs on.
 
 ## One-time setup (in a terminal)
 
 Set up the wallet once, in a real terminal:
 
 ```sh
-npx -y --no-audit --no-fund shinjuku-shield@0.3.131 setup
+npx -y --no-audit --no-fund shinjuku-shield@0.3.218 setup
 ```
 
 The setup asks questions, so an agent cannot do it. Until setup is done, `SHINJUKU_STATUS` answers `setUp: false`. The other actions answer `shinjuku_tool_unavailable` with that setup line, and call nothing.
@@ -57,9 +57,9 @@ A payment to an outside seller goes through Shinjuku: your wallet pays Shinjuku 
 
 ## Wallet version
 
-By default the plugin runs `npx -y --no-audit --no-fund shinjuku-shield@0.3.131 mcp`: the exact stable wallet release this plugin version was checked with. A new stable wallet release comes with a new plugin version. Set up the wallet with the same version (the setup line above).
+By default the plugin runs `npx -y --no-audit --no-fund shinjuku-shield@0.3.218 mcp`: the exact stable wallet release this plugin version was checked with. A new stable wallet release comes with a new plugin version. Set up the wallet with the same version (the setup line above).
 
-To run another wallet version, set `version`, for example `ShinjukuPlugin({ version: "0.3.131" })`. Newer wallets name two tools differently (`pay_for_service` for `x402_pay`, `check_price` for `x402_preview`); the plugin calls the name the wallet lists, so both work.
+To run another wallet version, set `version` to that `shinjuku-shield` version or dist-tag. Wallets newer than 0.3.131 name two tools differently (`pay_for_service` for `x402_pay`, `check_price` for `x402_preview`); the plugin calls the name the wallet lists, so both work.
 
 The workflow `daily-check.yml` has no schedule: a maintainer starts it by hand. It sets up an empty throwaway wallet and checks that each wallet tool that the plugin calls exists and takes the plugin's arguments. It moves no money. On a difference, it opens an issue in this repository.
 
@@ -67,7 +67,7 @@ The workflow `daily-check.yml` has no schedule: a maintainer starts it by hand. 
 
 | Option | Wallet flag | Meaning |
 | --- | --- | --- |
-| `version` | | `shinjuku-shield` version or dist-tag to run. Default `0.3.131` (the stable release). |
+| `version` | | `shinjuku-shield` version or dist-tag to run. Default `0.3.218` (the stable release). |
 | `walletHome` | env `SHIELDED_WALLET_HOME` | The wallet folder. |
 | `maxPayment` | `--max-payment` | Most one payment may cost. |
 | `maxSession` | `--max-session` | Most all payments of one wallet process may cost. |
@@ -116,7 +116,7 @@ To use the wallet in the Vercel AI SDK without Solana Agent Kit, connect the MCP
 
 ## Live proof
 
-On 2026-10-13 a real `SolanaAgentKit` agent with this plugin (wallet `shinjuku-shielded@0.3.12`) paid a public satellite-imagery seller 0.013 USDC (+0.001 fee) on Solana mainnet through `SHINJUKU_X402_PAY`, and got the JPEG back in 36 s. That run used an older wallet (0.3.12); no live run with 0.3.131 is on record yet:
+On 2026-10-13 a real `SolanaAgentKit` agent with this plugin (wallet `shinjuku-shielded@0.3.12`) paid a public satellite-imagery seller 0.013 USDC (+0.001 fee) on Solana mainnet through `SHINJUKU_X402_PAY`, and got the JPEG back in 36 s. That run used an older wallet (0.3.12); no live run with 0.3.218 is on record yet:
 
 - Private payment from the wallet to Shinjuku (pool transaction): [`66BgMYrD…Nxex6E`](https://solscan.io/tx/66BgMYrD6XecUcy3EVo1UmkrAWxDdidC4qLUDeLuzsjsm3KFNhYoNhdLW3QTQkgPJmWsTmjjP7VcQ8StFtNxex6E)
 - Shinjuku pays the seller (the chain shows Shinjuku, not the wallet): [`4ecLga5y…9qudu`](https://solscan.io/tx/4ecLga5ypMivF8sqiUUb4Tfm7yQxWpp8dLcWSPe3tSfMmvsbFGsRHosr1QS58z68UsWCTdztDVvPBv5ZT4z9qudu)

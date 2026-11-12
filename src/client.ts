@@ -9,7 +9,7 @@ export const WALLET_PACKAGE = "shinjuku-shield";
  * Default wallet version: the exact stable release (the pin), not a dist-tag, so the plugin always runs a wallet it was
  * checked with. A new pin comes with a new plugin version. Set `version` to run another one.
  */
-export const DEFAULT_WALLET_VERSION = "0.3.131";
+export const DEFAULT_WALLET_VERSION = "0.3.218";
 
 /**
  * Each wallet tool the plugin calls under two names, newest first. A wallet answers the tools it lists: older wallets
