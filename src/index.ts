@@ -104,7 +104,15 @@ export function ShinjukuPlugin(options: ShinjukuPluginOptions = {}) {
     const tools = await wallet.toolNames();
     // wallet_status exists only while the wallet is not set up; a set-up server offers the wallet tools instead.
     if (tools.includes("wallet_status")) return wallet.call("wallet_status");
-    return { ok: true, setUp: true, tools };
+    // Set up = the wallet offers its balance tool. A list with neither tool is not read as set up.
+    if (tools.includes("wallet_balance")) return { ok: true, setUp: true, tools };
+    return {
+      ok: false,
+      setUp: false,
+      error: "shinjuku_status_unknown",
+      detail: "the wallet lists neither wallet_status nor wallet_balance, so the plugin cannot tell whether it is set up",
+      tools,
+    };
   };
 
   const methods = {

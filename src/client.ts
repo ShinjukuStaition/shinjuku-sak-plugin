@@ -240,7 +240,8 @@ export class ShinjukuClient {
 
   /**
    * Calls pay_for_service (x402_pay on an older wallet). On wallet_refilling_retry_same_request (older wallets) it
-   * waits readyInSeconds and calls again with the SAME request_id, until payRetryMaxWaitMs is used up.
+   * waits readyInSeconds and calls again with the SAME request_id. A new call starts only if it can start before
+   * payRetryMaxWaitMs (from the first call) is used up; otherwise the last answer is returned at once.
    */
   async pay(args: Record<string, unknown>): Promise<ShinjukuResult> {
     const requestId = typeof args.request_id === "string" ? args.request_id : newRequestId("pay");
@@ -252,9 +253,8 @@ export class ShinjukuClient {
       if (answer.error !== REFILLING_CODE) return withRequestId(answer, requestId);
       const ready = Number(answer.readyInSeconds);
       const waitMs = Math.max(1000, Number.isFinite(ready) ? ready * 1000 : 30_000);
-      const left = deadline - Date.now();
-      if (left <= 0) return withRequestId(answer, requestId);
-      await sleep(Math.min(waitMs, left));
+      if (Date.now() + waitMs >= deadline) return withRequestId(answer, requestId);
+      await sleep(waitMs);
     }
   }
 

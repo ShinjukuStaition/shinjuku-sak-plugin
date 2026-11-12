@@ -22,7 +22,7 @@ Set up the wallet once, in a real terminal:
 npx -y --no-audit --no-fund shinjuku-shield@0.3.218 setup
 ```
 
-The setup asks questions, so an agent cannot do it. Until setup is done, `SHINJUKU_STATUS` answers `setUp: false`. The other actions answer `shinjuku_tool_unavailable` with that setup line, and call nothing.
+This plugin needs the wallet set up before its first call: the plugin itself cannot run setup. (The wallet's own setup also has a no-question form, `setup --yes`, and an MCP client that can show the wallet's setup question can run it; see the wallet README.) Until setup is done, `SHINJUKU_STATUS` answers `setUp: false`. The other actions answer `shinjuku_tool_unavailable` with that setup line, and call nothing.
 
 To use a different wallet folder, set `SHIELDED_WALLET_HOME` for the setup. Give the same folder to the plugin as `walletHome`.
 
@@ -51,7 +51,7 @@ await shinjuku.close(); // stop the wallet process
 
 The plugin starts ONE wallet process per plugin instance, on the first call. `close()` (or `agent.methods.shinjukuClose()`) stops it. A later call starts it again.
 
-Every method and every action returns the wallet's parsed JSON answer. Amounts are atomic USDC units: `1000000` = 1 USDC.
+The balance, receipts, preview, pay, shield and unshield methods and actions return the wallet's parsed JSON answer (or the plugin's own `shinjuku_tool_unavailable` answer when the wallet does not offer that tool). `shinjukuStatus` returns the wallet's `wallet_status` answer before setup, and a plugin-made object after it. `shinjukuClose` returns nothing. An input that does not match the action's zod schema throws an error before the wallet is called. Amounts are atomic USDC units: `1000000` = 1 USDC.
 
 A payment to an outside seller goes through Shinjuku: your wallet pays Shinjuku privately, and Shinjuku pays the seller. The answer then holds `shinjukuTransaction` (your private payment) and `transaction` (the seller's settlement, when the seller returns one).
 
@@ -61,7 +61,7 @@ By default the plugin runs `npx -y --no-audit --no-fund shinjuku-shield@0.3.218 
 
 To run another wallet version, set `version` to that `shinjuku-shield` version or dist-tag. Wallets newer than 0.3.131 name two tools differently (`pay_for_service` for `x402_pay`, `check_price` for `x402_preview`); the plugin calls the name the wallet lists, so both work.
 
-The workflow `daily-check.yml` has no schedule: a maintainer starts it by hand. It sets up an empty throwaway wallet and checks that each wallet tool that the plugin calls exists and takes the plugin's arguments. It moves no money. On a difference, it opens an issue in this repository.
+The workflow `daily-check.yml` has no schedule: a maintainer starts it by hand. It sets up an empty throwaway wallet and checks that each wallet tool that the plugin calls exists, that the tool's input lists every argument name the plugin sends, and that the plugin sends every argument the tool requires. It does not check argument types or limits, and it does not call the paying tools; `wallet_status` (a setup-time tool) is not in its list. It calls only `shinjukuStatus` and `shinjukuBalance` and moves no money. On a difference, it opens an issue in this repository.
 
 ## Options
 
@@ -82,7 +82,7 @@ The workflow `daily-check.yml` has no schedule: a maintainer starts it by hand. 
 
 | Action | Method | Wallet tool | Input | Costs money |
 | --- | --- | --- | --- | --- |
-| `SHINJUKU_STATUS` | `shinjukuStatus` | `wallet_status` before setup; after setup the list of wallet tools | none | no |
+| `SHINJUKU_STATUS` | `shinjukuStatus` | `wallet_status` before setup; after setup the list of wallet tools (`shinjuku_status_unknown` when the wallet lists neither `wallet_status` nor `wallet_balance`) | none | no |
 | `SHINJUKU_BALANCE` | `shinjukuBalance` | `wallet_balance` | none | no |
 | `SHINJUKU_RECEIPTS` | `shinjukuReceipts` | `wallet_receipts` | `limit` (1-200) | no |
 | `SHINJUKU_X402_PREVIEW` | `shinjukuPreview` | `check_price` (`x402_preview` on 0.3.131) | `url`, `method`, `headers`, `body` | no |
@@ -104,7 +104,7 @@ Unshield to an address that is not in `unshieldTo` needs a confirmation in an MC
 
 An older wallet (not 0.3.131) can answer a payment with `wallet_refilling_retry_same_request` and `readyInSeconds`. This is not a payment. The wallet moves value inside your private balance first.
 
-`shinjukuPay` then waits `readyInSeconds` and calls again with the SAME `request_id`. It stops after `payRetryMaxWaitMs` (default 15 minutes) and returns the last answer.
+`shinjukuPay` then waits `readyInSeconds` and calls again with the SAME `request_id`. It starts a new call only when that call can start within `payRetryMaxWaitMs` (default 15 minutes) of the first one; otherwise it returns the last answer at once. A call that has started can run longer, up to `callTimeoutMs`.
 
 A repeat with the same `request_id` never pays twice. After a payment it returns the same receipt.
 
@@ -138,7 +138,7 @@ The check calls only `shinjukuStatus` and `shinjukuBalance`. Both are free. It m
 node scripts/interface-check.mjs <wallet-folder> [wallet-version]
 ```
 
-The interface check also compares the wallet's tool list with the arguments the plugin sends. The `daily-check.yml` workflow (started by hand) runs it.
+The interface check also compares the wallet's tool list with the argument names the plugin sends (names and required fields only, not types). The `daily-check.yml` workflow (started by hand) runs it.
 
 ## Interface source
 

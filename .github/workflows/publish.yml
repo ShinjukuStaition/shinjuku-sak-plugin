@@ -39,10 +39,18 @@ jobs:
           set -euo pipefail
           name=$(node -p "require('./package.json').name")
           version=$(node -p "require('./package.json').version")
-          if npm view "$name@$version" version >/dev/null 2>&1; then
+          # Go on only when the registry answers E404 for this version; any other error (network, auth) stops the job.
+          set +e
+          out=$(npm view "$name@$version" version 2>&1)
+          rc=$?
+          set -e
+          if [ "$rc" -eq 0 ] && [ -n "$out" ]; then
             echo "::error::$name@$version is already published"; exit 1
           fi
-          echo "publishing $name@$version"
+          if [ "$rc" -eq 0 ] || ! grep -q "code E404" <<<"$out"; then
+            echo "::error::npm view $name@$version did not answer E404 (exit $rc):"; echo "$out"; exit 1
+          fi
+          echo "publishing $name@$version (the registry has no such version)"
 
       - name: Install, build, pack list
         run: npm ci && npm run build && npm pack --dry-run
