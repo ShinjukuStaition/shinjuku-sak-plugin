@@ -255,6 +255,8 @@ export class ShinjukuClient {
       const waitMs = Math.max(1000, Number.isFinite(ready) ? ready * 1000 : 30_000);
       if (Date.now() + waitMs >= deadline) return withRequestId(answer, requestId);
       await sleep(waitMs);
+      // A timer can fire late: check the deadline again before the next call.
+      if (Date.now() >= deadline) return withRequestId(answer, requestId);
     }
   }
 
