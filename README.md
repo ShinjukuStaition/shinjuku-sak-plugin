@@ -19,7 +19,7 @@ Node 22.21 or later, or Node 24 or later (the wallet needs it). `npx` must be on
 Set up the wallet once, in a real terminal:
 
 ```sh
-npx -y --no-audit --no-fund shinjuku-shield@0.3.218 setup
+npx -y --no-audit --no-fund shinjuku setup
 ```
 
 This plugin needs the wallet set up before its first call: the plugin itself cannot run setup. (The wallet's own setup also has a no-question form, `setup --yes`, and an MCP client that can show the wallet's setup question can run it; see the wallet README.) Until setup is done, `SHINJUKU_STATUS` answers `setUp: false`. The other actions answer `shinjuku_tool_unavailable` with that setup line, and call nothing.
