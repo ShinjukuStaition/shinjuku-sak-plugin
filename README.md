@@ -8,19 +8,39 @@ The plugin does not hold keys and does not make payments by itself. It starts th
 
 ## Install
 
+Linux and macOS:
+
 ```sh
 npm install solana-agent-kit solana-agent-kit-plugin-shinjuku
+```
+
+Windows (Command Prompt or PowerShell):
+
+```bat
+npm.cmd install solana-agent-kit solana-agent-kit-plugin-shinjuku
 ```
 
 Node 22.21 or later, or Node 24 or later (the wallet needs it). `npx` must be on the PATH. The wallet version this plugin runs is `shinjuku-shield` 0.3.218; its [README](https://github.com/ShinjukuStaition/shinjuku-shield) names the systems it runs on.
 
 ## One-time setup (in a terminal)
 
-Set up the wallet once, in a real terminal:
+Set up the wallet once, in a real terminal.
+
+Linux:
 
 ```sh
 npx -y --no-audit --no-fund shinjuku setup
 ```
+
+Windows (Command Prompt or PowerShell):
+
+```bat
+npx.cmd -y --no-audit --no-fund shinjuku setup
+```
+
+On Windows, type `npm.cmd` and `npx.cmd` where a line in this README says `npm` or `npx` (they run in Command Prompt
+and in PowerShell). App start lines, app configs and `claude mcp add ... npx ...` lines stay as they are: the plugin
+starts the wallet itself (see "On Windows" below).
 
 This plugin needs the wallet set up before its first call: the plugin itself cannot run setup. (The wallet's own setup also has a no-question form, `setup --yes`, and an MCP client that can show the wallet's setup question can run it; see the wallet README.) Until setup is done, `SHINJUKU_STATUS` answers `setUp: false`. The other actions answer `shinjuku_tool_unavailable` with that setup line, and call nothing.
 
