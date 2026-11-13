@@ -129,7 +129,7 @@ export function ShinjukuPlugin(options: ShinjukuPluginOptions = {}) {
   const actions: Action[] = [
     action(
       "SHINJUKU_BALANCE",
-      ["private balance", "shielded balance", "shinjuku balance", "x402 wallet balance"],
+      ["private balance", "shielded balance", "shinjuku balance", "x402 wallet balance"], // typed-line-check: not a command (phrases an agent matches)
       "Read the Shinjuku private wallet balance: the one balance x402 payments spend, the shielded part, and plain USDC on the wallet's own key. Free.",
       balanceSchema,
       { input: {}, output: { ok: true, balanceAtomic: "1000000" }, explanation: "Read the private USDC balance" },

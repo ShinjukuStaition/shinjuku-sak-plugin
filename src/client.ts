@@ -12,6 +12,16 @@ export const WALLET_PACKAGE = "shinjuku-shield";
 export const DEFAULT_WALLET_VERSION = "0.3.218";
 
 /**
+ * The name a user types for a command that npm installs (npm, npx): `<name>.cmd` on Windows. npm writes a .cmd, a .ps1
+ * and a POSIX file for each command, and Windows PowerShell picks the .ps1, which its default setting on a Windows client
+ * refuses ("running scripts is disabled on this system"). The .cmd file runs in Command Prompt and in PowerShell. Only for
+ * a line the user types; the plugin itself starts the wallet with `cmd /c npx` (buildCommand).
+ */
+export function typedCommand(name: "npm" | "npx", platform: NodeJS.Platform = process.platform): string {
+  return platform === "win32" ? `${name}.cmd` : name;
+}
+
+/**
  * Each wallet tool the plugin calls under two names, newest first. A wallet answers the tools it lists: older wallets
  * list only the older names (0.3.131: x402_pay, x402_preview), newer ones the new names (and still take the old ones as
  * aliases).
@@ -170,7 +180,7 @@ export class ShinjukuClient {
       env: childEnv(this.options.walletHome),
       stderr: "ignore",
     });
-    const client = new Client({ name: "solana-agent-kit-plugin-shinjuku", version: "0.1.2" });
+    const client = new Client({ name: "solana-agent-kit-plugin-shinjuku", version: "0.1.3" });
     const run = client.connect(transport).then(
       () => {
         this.client = client;
@@ -223,9 +233,9 @@ export class ShinjukuClient {
           ? `the wallet is not set up yet, so it does not offer ${names.join(" or ")}; nothing was paid or moved`
           : `this wallet version (${WALLET_PACKAGE}@${version}) does not offer ${names.join(" or ")}; nothing was paid or moved`,
         next: notSetUp
-          ? `run \`npx -y --no-audit --no-fund ${WALLET_PACKAGE}@${version} setup\` in a terminal, then call again`
+          ? `run \`${typedCommand("npx")} -y --no-audit --no-fund ${WALLET_PACKAGE}@${version} setup\` in a terminal, then call again`
           : version === DEFAULT_WALLET_VERSION
-            ? `install the newest version of this plugin (npm install solana-agent-kit-plugin-shinjuku@latest), then call again`
+            ? `install the newest version of this plugin (${typedCommand("npm")} install solana-agent-kit-plugin-shinjuku@latest), then call again`
             : `leave \`version\` unset so the plugin runs the wallet version it was checked with (${WALLET_PACKAGE}@${DEFAULT_WALLET_VERSION}), then call again`,
       };
     }
