@@ -9,7 +9,7 @@ export const WALLET_PACKAGE = "shinjuku-shield";
  * Default wallet version: the exact stable release (the pin), not a dist-tag, so the plugin always runs a wallet it was
  * checked with. A new pin comes with a new plugin version. Set `version` to run another one.
  */
-export const DEFAULT_WALLET_VERSION = "0.3.269";
+export const DEFAULT_WALLET_VERSION = "0.3.270";
 
 /**
  * The name a user types for a command that npm installs (npm, npx): `<name>.cmd` on Windows. npm writes a .cmd, a .ps1
