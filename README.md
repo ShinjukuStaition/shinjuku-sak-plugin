@@ -20,7 +20,7 @@ Windows (Command Prompt or PowerShell):
 npm.cmd install solana-agent-kit solana-agent-kit-plugin-shinjuku
 ```
 
-Node 24.22.1 or later, or Node 22.23.4 or later (the wallet needs it). `npx` must be on the PATH. The wallet version this plugin runs is `shinjuku-shield` 0.3.270; its [README](https://github.com/ShinjukuStaition/shinjuku-shield) names the systems it runs on.
+Node 24.22.1 or later, or Node 22.23.4 or later (the wallet needs it). `npx` must be on the PATH. The wallet version this plugin runs is `shinjuku-shield` 0.3.281; its [README](https://github.com/ShinjukuStaition/shinjuku-shield) names the systems it runs on.
 
 ## One-time setup (in a terminal)
 
@@ -77,7 +77,7 @@ A payment to an outside seller goes through Shinjuku: your wallet pays Shinjuku 
 
 ## Wallet version
 
-By default the plugin runs `npx -y --no-audit --no-fund shinjuku-shield@0.3.270 mcp`: the exact stable wallet release this plugin version was checked with. A new stable wallet release comes with a new plugin version. Set up the wallet with the same version (the setup line above).
+By default the plugin runs `npx -y --no-audit --no-fund shinjuku-shield@0.3.281 mcp`: the exact stable wallet release this plugin version was checked with. A new stable wallet release comes with a new plugin version. Set up the wallet with the same version (the setup line above).
 
 To run another wallet version, set `version` to that `shinjuku-shield` version or dist-tag. Wallets newer than 0.3.131 name two tools differently (`pay_for_service` for `x402_pay`, `check_price` for `x402_preview`); the plugin calls the name the wallet lists, so both work.
 
@@ -87,7 +87,7 @@ The workflow `daily-check.yml` has no schedule: a maintainer starts it by hand. 
 
 | Option | Wallet flag | Meaning |
 | --- | --- | --- |
-| `version` | | `shinjuku-shield` version or dist-tag to run. Default `0.3.270` (the stable release). |
+| `version` | | `shinjuku-shield` version or dist-tag to run. Default `0.3.281` (the stable release). |
 | `walletHome` | env `SHIELDED_WALLET_HOME` | The wallet folder. |
 | `maxPayment` | `--max-payment` | Most one payment may cost. |
 | `maxSession` | `--max-session` | Most all payments of one wallet process may cost. |
